@@ -32,9 +32,9 @@ module.exports.check_site = async _ => {
 
     // call eidl site to see if redirect response url changed yet
     const response = await axios.get('https://covid19relief.sba.gov');
-    if (response.request.res.responseUrl == "https://www.sba.gov/disaster-assistance/coronavirus-covid-19") {
-      return { message: "Application site is not live yet." };
-    }
+    // if (response.request.res.responseUrl == "https://www.sba.gov/disaster-assistance/coronavirus-covid-19") {
+    //   return { message: "Application site is not live yet." };
+    // }
 
     // if it has, launch lambda to process sms
     const lambData = await lambda.invoke({ 
@@ -89,7 +89,7 @@ module.exports.send_sms = async event => {
   try {
     // parse phone number array from event payload
     const phoneNumbers = JSON.parse(event);
-    const sIds = [];
+    const entryResps = [];
 
     // loop through each phone number and send sms from twilio
     for (let i = 0; i < phoneNumbers.length; i++) {
@@ -100,11 +100,30 @@ module.exports.send_sms = async event => {
       });
 
       // push sid to array
-      sIds.push(resp.sid);
+      const entryResp = { sId: resp.sid };
+
+      // mark sent: true, in dynamodb
+      const params = {
+        TableName: process.env.USER_TABLE,
+        Key: {
+          phone_number: phoneNumbers[i].phone_number
+        },
+        UpdateExpression: "set sent = :fullname",
+            ExpressionAttributeValues:{
+                ":sent": true
+            },
+            ReturnValues: "UPDATED_NEW"
+      };
+
+      await dynamoDb.update(params).promise();
+
+      // add entry to the array resp
+      entryResp.phoneNumber = phoneNumbers[i].phoneNumber
+      entryResps.push(entryResp);
     }
 
     // send response back
-    return { message: "Processed all SMS successfully!", sIds };
+    return { message: "Processed all SMS successfully!", entryResps };
   } catch (err) {
     return { error: JSON.stringify(err) };
   }
