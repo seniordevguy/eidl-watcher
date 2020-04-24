@@ -27,7 +27,9 @@ module.exports.check_site = async _ => {
     // get app state from db, if its true that means the cron shouldnt run anymore
     const data = await dynamoDb.scan(params).promise();
     if (data.Items[0].app_state) {
-      return { message: 'Site is live, and cron job doesnt need to run anymore.'};
+      const message = 'Site is live. dont run cron job anymore';
+      console.log(message);
+      return { message };
     }
 
     // call eidl site to see if redirect response url changed yet
