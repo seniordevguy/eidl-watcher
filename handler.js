@@ -38,7 +38,7 @@ module.exports.check_site = async _ => {
 
     // if it has, launch lambda to process sms
     const lambData = await lambda.invoke({ 
-      FunctionName: `eidl-scraper-lambda-${process.env.APP_ENV}-process_sms`
+      FunctionName: `${process.env.APP_NAME}-${process.env.APP_ENV}-process_sms`
     }).promise();
 
     // update app state
@@ -85,7 +85,7 @@ module.exports.process_sms = async _ => {
         
         // launch lambda for each chunk of phone numbers
         const lambData = await lambda.invoke({ 
-          FunctionName: `eidl-scraper-lambda-${process.env.APP_ENV}-send_sms`,
+          FunctionName: `${process.env.APP_NAME}-${process.env.APP_ENV}-send_sms`,
           Payload: JSON.stringify(chunkedNumbers)
         }).promise();
 
