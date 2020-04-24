@@ -11,7 +11,7 @@ const twilioClient = require('twilio')(
 
 // lambda client
 const lambda = new AWS.Lambda({
-  region: "us-east-1"
+  region: 'us-east-1'
 });
 
 // dynamodb client
@@ -20,14 +20,14 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 module.exports.check_site = async _ => {
   const params = {
     TableName: process.env.STATE_TABLE,
-    ProjectionExpression: "id,app_state"
+    ProjectionExpression: 'id,app_state'
   };
 
   try {
     // get app state from db, if its true that means the cron shouldnt run anymore
     const data = await dynamoDb.scan(params).promise();
     if (data.Items[0].app_state) {
-      return { message: "Site is live, and cron job doesnt need to run anymore."};
+      return { message: 'Site is live, and cron job doesnt need to run anymore.'};
     }
 
     // call eidl site to see if redirect response url changed yet
@@ -45,20 +45,20 @@ module.exports.check_site = async _ => {
     const updateParams = {
       TableName: process.env.STATE_TABLE,
       Key: {
-        id: eidl
+        id: 'eidl'
       },
-      UpdateExpression: "set app_state = :app_state",
+      UpdateExpression: 'set app_state = :app_state',
       ExpressionAttributeValues: {
-          ":app_state": true
+          ':app_state': true
       },
-      ReturnValues: "UPDATED_NEW"
+      ReturnValues: 'UPDATED_NEW'
     };
 
     await dynamoDb.update(updateParams).promise();
 
     return { lambData };
   } catch (err) {
-    console.error("ERROR\n " + JSON.stringify(err));
+    console.log(err)
     return { error: JSON.stringify(err) };
   }
 };
@@ -97,7 +97,7 @@ module.exports.process_sms = async _ => {
     // send response back
     return { message: `Launched ${count} SMS Lamdas!`, lambResps };
   } catch (err) {
-    console.error("ERROR\n " + JSON.stringify(err));
+    console.log(err);
     return { error: JSON.stringify(err) };
   }
 };
@@ -125,11 +125,11 @@ module.exports.send_sms = async event => {
         Key: {
           phone_number: phoneNumbers[i].phone_number
         },
-        UpdateExpression: "set sent = :sent",
+        UpdateExpression: 'set sent = :sent',
             ExpressionAttributeValues:{
-                ":sent": true
+                ':sent': true
             },
-            ReturnValues: "UPDATED_NEW"
+            ReturnValues: 'UPDATED_NEW'
       };
 
       await dynamoDb.update(params).promise();
@@ -140,9 +140,9 @@ module.exports.send_sms = async event => {
     }
 
     // send response back
-    return { message: "Processed all SMS successfully!", entryResps };
+    return { message: 'Processed all SMS successfully!', entryResps };
   } catch (err) {
-    console.error("ERROR\n " + JSON.stringify(err));
+    console.log(err);
     return { error: JSON.stringify(err) };
   }
 };
