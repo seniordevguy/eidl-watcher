@@ -58,7 +58,9 @@ module.exports.check_site = async _ => {
 
     await dynamoDb.update(updateParams).promise();
 
-    return { lambData };
+    const message = 'Fired off SMS process lambda successfully!';
+    console.log(message, lambData);
+    return { message, lambData };
   } catch (err) {
     console.log(err)
     return { error: JSON.stringify(err) };
@@ -78,12 +80,14 @@ module.exports.process_sms = async _ => {
     // get all phone numbers in the db that arent marked as sent
     const data = await dynamoDb.scan(params).promise();
     const chunk = 50;
-    const count = 0;
+    let count = 0;
     const lambResps = [];
+    const phoneNumbers = data.Items;
 
     // chunk phone numbers into chunks of 50 and launch lambdas
-    for (let i = 0; i < data.Items.length; i += chunk) {
-        const chunkedNumbers = data.Items.slice(i, i + chunk);
+    while (phoneNumbers.length) {
+        const chunkedNumbers = phoneNumbers.splice(0, chunk);
+        console.log(chunkedNumbers)
         
         // launch lambda for each chunk of phone numbers
         const lambData = await lambda.invoke({ 
@@ -97,7 +101,9 @@ module.exports.process_sms = async _ => {
     }
 
     // send response back
-    return { message: `Launched ${count} SMS Lamdas!`, lambResps };
+    const message = `Launched ${count} SMS Lambdas!`;
+    console.log(message, lambResps);
+    return { message, lambResps };
   } catch (err) {
     console.log(err);
     return { error: JSON.stringify(err) };
@@ -107,7 +113,8 @@ module.exports.process_sms = async _ => {
 module.exports.send_sms = async event => {
   try {
     // parse phone number array from event payload
-    const phoneNumbers = JSON.parse(event);
+    console.log(event);
+    const phoneNumbers = event;
     const entryResps = [];
 
     // loop through each phone number and send sms from twilio
@@ -119,7 +126,7 @@ module.exports.send_sms = async event => {
       });
 
       // push sid to array
-      const entryResp = { sId: resp.sid };
+      let entryResp = { sId: resp.sid };
 
       // mark sent: true, in dynamodb
       const params = {
@@ -142,7 +149,9 @@ module.exports.send_sms = async event => {
     }
 
     // send response back
-    return { message: 'Processed all SMS successfully!', entryResps };
+    const message = 'Processed all SMS successfully!';
+    console.log(message, entryResps);
+    return { message, entryResps };
   } catch (err) {
     console.log(err);
     return { error: JSON.stringify(err) };
