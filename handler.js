@@ -58,6 +58,7 @@ module.exports.check_site = async _ => {
 
     return { lambData };
   } catch (err) {
+    console.error("ERROR\n " + JSON.stringify(err));
     return { error: JSON.stringify(err) };
   }
 };
@@ -96,6 +97,7 @@ module.exports.process_sms = async _ => {
     // send response back
     return { message: `Launched ${count} SMS Lamdas!`, lambResps };
   } catch (err) {
+    console.error("ERROR\n " + JSON.stringify(err));
     return { error: JSON.stringify(err) };
   }
 };
@@ -140,6 +142,7 @@ module.exports.send_sms = async event => {
     // send response back
     return { message: "Processed all SMS successfully!", entryResps };
   } catch (err) {
+    console.error("ERROR\n " + JSON.stringify(err));
     return { error: JSON.stringify(err) };
   }
 };
