@@ -41,6 +41,21 @@ module.exports.check_site = async _ => {
       FunctionName: `eidl-scraper-lambda-${process.env.APP_ENV}-process_sms`
     }).promise();
 
+    // update app state
+    const updateParams = {
+      TableName: process.env.STATE_TABLE,
+      Key: {
+        id: eidl
+      },
+      UpdateExpression: "set app_state = :app_state",
+      ExpressionAttributeValues: {
+          ":app_state": true
+      },
+      ReturnValues: "UPDATED_NEW"
+    };
+
+    await dynamoDb.update(updateParams).promise();
+
     return { lambData };
   } catch (err) {
     return { error: JSON.stringify(err) };
@@ -52,7 +67,7 @@ module.exports.process_sms = async _ => {
     TableName: process.env.USER_TABLE,
     FilterExpression: 'sent = :sent',
     ExpressionAttributeValues : {
-        ':sent' :  false
+        ':sent': false
     }   
   };
 
@@ -108,7 +123,7 @@ module.exports.send_sms = async event => {
         Key: {
           phone_number: phoneNumbers[i].phone_number
         },
-        UpdateExpression: "set sent = :fullname",
+        UpdateExpression: "set sent = :sent",
             ExpressionAttributeValues:{
                 ":sent": true
             },
