@@ -34,9 +34,9 @@ module.exports.check_site = async _ => {
 
     // call eidl site to see if redirect response url changed yet
     const response = await axios.get('https://covid19relief.sba.gov');
-    // if (response.request.res.responseUrl == "https://www.sba.gov/disaster-assistance/coronavirus-covid-19") {
-    //   return { message: "Application site is not live yet." };
-    // }
+    if (response.request.res.responseUrl == "https://www.sba.gov/disaster-assistance/coronavirus-covid-19") {
+      return { message: "Application site is not live yet." };
+    }
 
     // if it has, launch lambda to process sms
     const lambData = await lambda.invoke({ 
