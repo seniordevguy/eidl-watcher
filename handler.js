@@ -135,10 +135,10 @@ module.exports.send_sms = async event => {
           phone_number: phoneNumbers[i].phone_number
         },
         UpdateExpression: 'set sent = :sent',
-            ExpressionAttributeValues:{
-                ':sent': true
-            },
-            ReturnValues: 'UPDATED_NEW'
+        ExpressionAttributeValues:{
+          ':sent': true
+        },
+        ReturnValues: 'UPDATED_NEW'
       };
 
       await dynamoDb.update(params).promise();
