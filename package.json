@@ -19,7 +19,7 @@
   "homepage": "https://github.com/seniordevguy/eidl-scraper-lambda#readme",
   "dependencies": {
     "aws-sdk": "^2.662.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "twilio": "^3.42.2"
   }
 }
